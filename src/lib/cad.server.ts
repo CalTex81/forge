@@ -13,10 +13,10 @@ Rules:
 
 export async function generateCadCode(input: {
   prompt: string;
-  currentCode?: string;
-  error?: string;
+  currentCode?: string | undefined;
+  error?: string | undefined;
 }) {
-  const apiKey = process.env.LOVABLE_API_KEY;
+  const apiKey = process.env["LOVABLE_API_KEY"];
   if (!apiKey) throw new Error("AI is not configured.");
   const provider = createOpenAI({
     baseURL: "https://ai.gateway.lovable.dev/v1",
@@ -43,13 +43,21 @@ export async function generateCadCode(input: {
     },
   } as Parameters<typeof streamText>[0]);
   let text = "";
+  let streamErr: unknown;
   try {
-    text = await result.text;
-  } catch (e: unknown) {
-    const err = e as { statusCode?: number; message?: string };
-    if (err.statusCode === 429) throw new Error("Too many requests — please wait a moment.");
-    if (err.statusCode === 402) throw new Error("AI credits exhausted. Add credits to continue.");
-    throw new Error(err.message || "AI request failed");
+    for await (const part of result.fullStream) {
+      if (part.type === "text-delta") text += (part as { text?: string }).text ?? "";
+      else if (part.type === "error") streamErr = part.error;
+    }
+  } catch (e) {
+    streamErr ??= e;
+  }
+  if (streamErr || !text.trim()) {
+    const err = (streamErr ?? {}) as { statusCode?: number; message?: string };
+    if (err.statusCode === 429) throw new Error("Too many requests — please wait a moment and try again.");
+    if (err.statusCode === 402 || err.statusCode === 403)
+      throw new Error("Out of AI credits. Add credits in Lovable (Settings → Plans & credits) to keep generating.");
+    throw new Error(err.message || "The AI returned no code. Please try again.");
   }
   return text.replace(/^```[a-z]*\n?/i, "").replace(/```\s*$/, "").trim();
 }

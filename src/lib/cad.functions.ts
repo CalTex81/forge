@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 
 export const generateCad = createServerFn({ method: "POST" })
-  .validator((d: { prompt: string; currentCode?: string; error?: string }) => {
+  .validator((d: { prompt: string; currentCode?: string | undefined; error?: string | undefined }) => {
     if (!d?.prompt || typeof d.prompt !== "string" || d.prompt.length > 4000)
       throw new Error("Invalid prompt");
     return d;

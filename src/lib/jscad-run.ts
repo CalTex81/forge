@@ -18,7 +18,7 @@ export function geomToThree(g: Geom): THREE.BufferGeometry {
   const pos: number[] = [];
   for (const p of polys) {
     const v = p.vertices;
-    for (let i = 1; i < v.length - 1; i++) pos.push(...v[0], ...v[i], ...v[i + 1]);
+    for (let i = 1; i < v.length - 1; i++) pos.push(...v[0]!, ...v[i]!, ...v[i + 1]!);
   }
   const bg = new THREE.BufferGeometry();
   bg.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
