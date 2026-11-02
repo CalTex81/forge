@@ -15,7 +15,15 @@ function fail(message) {
   process.exit(1);
 }
 
-let child = spawn(electronPath, [".", `--remote-debugging-port=${DEBUG_PORT}`], {
+// FORGE_SMOKE_APP points at a built app (release/win-unpacked/Forge.exe) so the
+// installer artifact can be checked instead of the dev shell.
+const appImage = process.env["FORGE_SMOKE_APP"];
+const executable = appImage || electronPath;
+const args = appImage
+  ? [`--remote-debugging-port=${DEBUG_PORT}`]
+  : [".", `--remote-debugging-port=${DEBUG_PORT}`];
+
+let child = spawn(executable, args, {
   stdio: ["ignore", "pipe", "pipe"],
   windowsHide: true,
 });
