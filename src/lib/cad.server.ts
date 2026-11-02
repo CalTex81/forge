@@ -13,10 +13,10 @@ Rules:
 
 export async function generateCadCode(input: {
   prompt: string;
-  currentCode?: string;
-  error?: string;
+  currentCode?: string | undefined;
+  error?: string | undefined;
 }) {
-  const apiKey = process.env.LOVABLE_API_KEY;
+  const apiKey = process.env["LOVABLE_API_KEY"];
   if (!apiKey) throw new Error("AI is not configured.");
   const provider = createOpenAI({
     baseURL: "https://ai.gateway.lovable.dev/v1",
