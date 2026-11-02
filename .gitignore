@@ -9,9 +9,13 @@ lerna-debug.log*
 
 node_modules
 dist
+release
 dist-ssr
 .output
 .vinxi
+
+# Electron run artifacts
+forge-userdata/
 .tanstack/**
 .nitro
 *.local

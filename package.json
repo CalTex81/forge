@@ -1,6 +1,10 @@
 {
   "name": "tanstack_start_ts",
   "private": true,
+  "version": "1.0.0",
+  "description": "Describe a part in words, get parametric CAD code and a 3D model, powered by a model running on your own machine.",
+  "author": "Forge",
+  "main": "electron/main.cjs",
   "sideEffects": false,
   "type": "module",
   "scripts": {
@@ -11,10 +15,48 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "desktop:build": "node scripts/build-desktop.mjs",
+    "desktop:start": "electron .",
+    "desktop:smoke": "node scripts/smoke-desktop.mjs",
+    "desktop:dist": "npm run desktop:build && electron-builder --win nsis"
   },
   "overrides": {
     "rolldown": "1.2.1"
+  },
+  "build": {
+    "appId": "com.forge.cad",
+    "productName": "Forge",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "electron/**/*",
+      "package.json",
+      "!node_modules/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": ".output",
+        "to": "output"
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "shortcutName": "Forge"
+    }
   },
   "dependencies": {
     "@ai-sdk/openai": "^4.0.106",
@@ -87,6 +129,8 @@
     "@types/react-dom": "^19.2.0",
     "@types/three": "^0.187.0",
     "@vitejs/plugin-react": "^5.2.0",
+    "electron": "^45.2.1",
+    "electron-builder": "^26.18.0",
     "eslint": "^9.32.0",
     "eslint-config-prettier": "^10.1.1",
     "eslint-plugin-prettier": "^5.2.6",
