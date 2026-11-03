@@ -8,6 +8,7 @@ Output ONLY the code, no markdown fences, no prose.
 Rules:
 - The variables primitives, booleans, transforms, extrusions, hulls, expansions, colors, geometries, maths, measurements, text, utils are already in scope (each is the matching @jscad/modeling namespace). Do NOT import or require anything.
 - Define "function main() { ... }" returning a geom3 or an array of geom3.
+- This is JSCAD v2, which is functional: combine shapes with booleans.subtract(a, b), booleans.union(a, b), booleans.intersect(a, b). Never chain v1 methods such as a.subtract(b), a.union(b) or a.translate([...]) — those do not exist here; use transforms.translate([...], a) instead.
 - Units are millimetres. Use segments: 48 or more for round shapes.
 - Use colors.colorize([r,g,b], shape) for color where helpful.
 - Write clean, well-commented, parametric code (constants at top).
