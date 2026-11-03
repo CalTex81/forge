@@ -19,9 +19,9 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Forge — AI Text-to-CAD" },
-      { name: "description", content: "Describe a part in words, get parametric CAD code and an interactive 3D model you can refine and download as STL. Runs entirely on your own machine." },
+      { name: "description", content: "Describe a part in words, get parametric CAD code and an interactive 3D model you can refine and download as STL or 3MF. Runs entirely on your own machine." },
       { property: "og:title", content: "Forge — AI Text-to-CAD" },
-      { property: "og:description", content: "Describe a part, get a 3D CAD model. Refine with AI, download STL." },
+      { property: "og:description", content: "Describe a part, get a 3D CAD model. Refine with AI, download STL or 3MF." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -123,12 +123,17 @@ function Index() {
     }
   }
 
-  async function download(kind: "stl" | "js") {
+  async function download(kind: "stl" | "3mf" | "js") {
     let blob: Blob;
     let name: string;
     if (kind === "js") {
       blob = new Blob([code], { type: "text/javascript" });
       name = "model.jscad.js";
+    } else if (kind === "3mf") {
+      const ser = await import("@jscad/3mf-serializer");
+      const data = ser.serialize({ unit: "millimeter", compress: true }, ...(geoms ?? []));
+      blob = new Blob(data as BlobPart[], { type: "model/3mf" });
+      name = "model.3mf";
     } else {
       const ser = await import("@jscad/stl-serializer");
       const data = ser.serialize({ binary: true }, ...(geoms ?? []));
@@ -156,6 +161,7 @@ function Index() {
           {geoms && (
             <div className="flex gap-2">
               <button onClick={() => download("stl")} className="btn-primary">STL ↓</button>
+              <button onClick={() => download("3mf")} className="btn-primary">3MF ↓</button>
               <button onClick={() => download("js")} className="btn-ghost">Code ↓</button>
             </div>
           )}

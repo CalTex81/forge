@@ -1,7 +1,7 @@
 {
   "name": "tanstack_start_ts",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Describe a part in words, get parametric CAD code and a 3D model, powered by a model running on your own machine.",
   "author": "Forge",
   "main": "electron/main.cjs",
@@ -61,6 +61,7 @@
   "dependencies": {
     "@ai-sdk/openai": "^4.0.106",
     "@hookform/resolvers": "^5.2.2",
+    "@jscad/3mf-serializer": "^2.1.17",
     "@jscad/modeling": "^2.13.0",
     "@jscad/stl-serializer": "^2.1.23",
     "@radix-ui/react-accordion": "^1.2.12",
