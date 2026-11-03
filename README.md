@@ -2,16 +2,17 @@
 
 Describe a part in words. A language model **running on your computer** writes parametric
 [JSCAD](https://openjscad.xyz) code, the app executes it in the browser context and renders an
-interactive 3D model you can refine, edit and export as STL.
+interactive 3D model you can refine, edit and export as STL or 3MF.
 
 Nothing is sent to the cloud: the site is packaged as a Windows app that serves itself from a
 local port, and the model server is on `localhost`.
 
 ## Install
 
-Download `Forge Setup 1.0.0.exe` from the latest GitHub release and run it. The installer is
-per-user (no admin required) and lets you pick the install directory. It is unsigned, so Windows
-SmartScreen will ask for confirmation on first run.
+Download `Forge Setup 1.1.1.exe` from the latest GitHub release and run it. The installer is
+per-user (no admin required) and lets you pick the install directory. It is signed only when the
+build machine has signing credentials (see [Code signing](#code-signing)); an unsigned build makes
+Windows SmartScreen ask for confirmation on first run.
 
 ## Get the model (inside the app)
 
@@ -38,8 +39,55 @@ npm install
 npm run desktop:dist
 ```
 
-That produces `release/Forge Setup 1.0.0.exe` — a normal NSIS installer. Requirements are bundled;
-the installer is unsigned, so Windows SmartScreen will ask for confirmation on first run.
+That produces `release/Forge Setup 1.1.1.exe` — a normal NSIS installer. Requirements are bundled.
+The build reads signing credentials from the environment; with none present it prints a warning and
+produces an unsigned installer that SmartScreen will challenge.
+
+## Code signing
+
+An unsigned installer triggers "Windows protected your PC", and a self-signed certificate does not
+change that: SmartScreen only trusts certificates chained to a public CA it has seen before. Signing
+is wired into `electron-builder.config.mjs`, which signs with whatever credentials are in the
+environment and otherwise builds unsigned. Pick one of three setups:
+
+**PFX file** (from any standard code-signing certificate):
+
+```bash
+WIN_CSC_LINK=path/to/cert.pfx       # or a base64 blob, e.g. in CI secrets
+WIN_CSC_KEY_PASSWORD=…
+npm run desktop:dist
+```
+
+**Certificate in the Windows certificate store** (printed as a `certificateSubjectName`):
+
+```bash
+WIN_CERTIFICATE_SUBJECT_NAME="Your Name"   # or WIN_CERTIFICATE_SHA1=<thumbprint>
+WIN_TIMESTAMP_SERVER=http://timestamp.digicert.com   # optional; this is the default
+npm run desktop:dist
+```
+
+**Azure Trusted Signing** (cloud signing, no USB token — the only option that works unattended
+because CA/B rules forbid shipping a code-signing private key as a file):
+
+```bash
+FORGE_SIGN_ENDPOINT=https://eus.codesigning.azure.net
+FORGE_SIGN_ACCOUNT=your-signing-account
+FORGE_SIGN_PROFILE=your-certificate-profile
+FORGE_SIGN_PUBLISHER="Your Name"   # optional but recommended
+```
+
+Set `FORGE_REQUIRE_SIGNING=1` in a release build to turn a missing/expired credential into a hard
+error instead of a silent unsigned artifact.
+
+Expectations, so nobody is surprised later:
+
+- **Standard (OV) certificates** build SmartScreen reputation over weeks of downloads. New OV-signed
+  builds still warn until the file earns reputation.
+- **EV certificates** (hardware token or cloud HSM) remove the warning immediately, because they
+  inherit Microsoft's existing trust for the publisher.
+- A certificate issued under one publisher name only helps builds whose metadata matches that name.
+- Secrets stay out of the repo: `WIN_CSC_LINK` may be a path or base64, and CI supplies it as a
+  secret. `release/*.pfx` is never written by the build.
 
 ## Run without packaging
 

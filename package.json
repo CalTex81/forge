@@ -1,7 +1,7 @@
 {
   "name": "tanstack_start_ts",
   "private": true,
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Describe a part in words, get parametric CAD code and a 3D model, powered by a model running on your own machine.",
   "author": "Forge",
   "main": "electron/main.cjs",
@@ -19,7 +19,7 @@
     "desktop:build": "node scripts/build-desktop.mjs",
     "desktop:start": "electron .",
     "desktop:smoke": "node scripts/smoke-desktop.mjs",
-    "desktop:dist": "npm run desktop:build && electron-builder --win nsis"
+    "desktop:dist": "npm run desktop:build && electron-builder --win nsis --config electron-builder.config.mjs"
   },
   "overrides": {
     "rolldown": "1.2.1"
